@@ -1,4 +1,4 @@
-# MCP Basic Server Tools
+# MCP Basic Servers
 
 A small collection of self-contained installer scripts for local/home MCP servers exposed over HTTP.
 
