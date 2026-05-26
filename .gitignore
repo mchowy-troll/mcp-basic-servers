@@ -1,0 +1,17 @@
+# Local runtime files created by installers
+mcp_server_tools/
+.env
+.venv/
+__pycache__/
+*.pyc
+*.sqlite3
+*.sqlite3-*
+
+# Logs and temporary files
+*.log
+*.tmp
+.DS_Store
+
+# Local editor state
+.vscode/
+.idea/
