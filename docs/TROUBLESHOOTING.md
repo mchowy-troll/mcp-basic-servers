@@ -95,7 +95,7 @@ For current, recent, today’s, latest, price, weather, news, or time-sensitive 
 Then test again with:
 
 ```text
-sprawdź proszę informacje z kraju i ze świata dziś
+Please check today's national and international news.
 ```
 
 ## Generated files are in the wrong language
