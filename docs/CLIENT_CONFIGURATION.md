@@ -34,7 +34,11 @@ For current, recent, today’s, latest, price, weather, news, or time-sensitive 
 | Read a local workspace file | `txt_read`, `csv_read` |
 | Remember a fact/decision | `memory_write` |
 | Recall project/user context | `memory_search` or `memory_get_context` |
+| Back up local memory SQLite database | `memory_backup` |
 | Resolve a person/contact | contact search or recipient resolution tools |
+| Back up local contacts SQLite database | `contacts_backup` |
+
+Backup tools write only to their fixed backup directories under `~/mcp_server_tools/mcp_backups/`. The model cannot choose backup paths, file names, or subdirectories.
 
 ## Notes on dates
 

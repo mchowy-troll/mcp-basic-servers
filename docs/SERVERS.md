@@ -64,6 +64,7 @@ Purpose:
 - local memory records
 - search and context retrieval
 - update/delete/statistics
+- safe SQLite backups to a fixed backup directory
 
 Tools:
 
@@ -73,13 +74,17 @@ Tools:
 - `memory_update`
 - `memory_delete`
 - `memory_stats`
+- `memory_backup`
 - `server_info_memory`
 
 Storage:
 
 ```text
 ~/mcp_server_tools/mcp_database/memory_database.sqlite3
+~/mcp_server_tools/mcp_backups/memory_backups/
 ```
+
+`memory_backup` uses the SQLite Backup API. The model cannot choose the backup path, file name, or create a subdirectory.
 
 ## `mcp_basic_contacts.sh`
 
@@ -90,14 +95,18 @@ Purpose:
 - local contacts database
 - search/update/delete contacts
 - resolve a recipient by nickname, name, email, phone, company, or related fields
+- safe SQLite backups to a fixed backup directory
 
-Tools include contact creation, search, get, update, delete, recipient resolution, existence checks, recent contact listing, and server info.
+Tools include contact creation, search, get, update, delete, recipient resolution, existence checks, recent contact listing, fixed-location SQLite backup (`contacts_backup`), and server info.
 
 Storage:
 
 ```text
 ~/mcp_server_tools/mcp_database/contacts_database.sqlite3
+~/mcp_server_tools/mcp_backups/contacts_backups/
 ```
+
+`contacts_backup` uses the SQLite Backup API. The model cannot choose the backup path, file name, or create a subdirectory.
 
 ## `mcp_basic_wiki_verifier.sh`
 

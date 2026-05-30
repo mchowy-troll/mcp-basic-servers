@@ -122,7 +122,8 @@ Additional shared directories:
 
 ```text
 ~/mcp_server_tools/mcp_workspace/   # files server only
-~/mcp_server_tools/mcp_database/    # memory and contacts only
+~/mcp_server_tools/mcp_database/    # memory and contacts databases
+~/mcp_server_tools/mcp_backups/     # memory and contacts SQLite backups
 ```
 
 ## After installation
@@ -161,4 +162,4 @@ For database-backed servers, data is stored outside the generated application di
 ~/mcp_server_tools/mcp_database/
 ```
 
-Review and back up this directory before destructive maintenance.
+Review this directory before destructive maintenance. The memory and contacts servers can create safe SQLite backups with `memory_backup` and `contacts_backup`; those backups are written to fixed subdirectories under `~/mcp_server_tools/mcp_backups/`.

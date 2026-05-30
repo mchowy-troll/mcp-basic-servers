@@ -19,6 +19,8 @@ APP_DIR="${BASE_DIR}/app"
 VENV_DIR="${BASE_DIR}/.venv"
 DATA_DIR="${ROOT_DIR}/mcp_database"
 DB_PATH="${DATA_DIR}/memory_database.sqlite3"
+BACKUPS_ROOT_DIR="${ROOT_DIR}/mcp_backups"
+BACKUP_DIR="${BACKUPS_ROOT_DIR}/memory_backups"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}"
 ENV_FILE="${BASE_DIR}/${ENV_FILE_NAME}"
 
@@ -311,10 +313,11 @@ set_timezone_from_system() {
 }
 
 create_directories() {
-  log "Creating application and database directories"
+  log "Creating application, database, and backup directories"
   mkdir -p \
     "${APP_DIR}" \
-    "${DATA_DIR}"
+    "${DATA_DIR}" \
+    "${BACKUP_DIR}"
 }
 
 write_env_file() {
@@ -330,6 +333,8 @@ BASE_DIR=${BASE_DIR}
 APP_DIR=${APP_DIR}
 DATA_DIR=${DATA_DIR}
 DB_PATH=${DB_PATH}
+BACKUPS_ROOT_DIR=${BACKUPS_ROOT_DIR}
+BACKUP_DIR=${BACKUP_DIR}
 VENV_DIR=${VENV_DIR}
 MCP_PORT=${MCP_PORT}
 DEFAULT_TIMEZONE=${DEFAULT_TIMEZONE}
@@ -377,6 +382,8 @@ DEFAULT_TIMEZONE = os.environ.get("DEFAULT_TIMEZONE", "UTC")
 BASE_DIR = Path(os.environ.get("BASE_DIR", str(Path.home() / "mcp_server_tools" / "mcp_basic_memory"))).resolve()
 DATA_DIR = Path(os.environ.get("DATA_DIR", str(Path.home() / "mcp_server_tools" / "mcp_database"))).resolve()
 DB_PATH = Path(os.environ.get("DB_PATH", str(DATA_DIR / "memory_database.sqlite3"))).resolve()
+BACKUPS_ROOT_DIR = (Path(os.environ.get("ROOT_DIR", str(Path.home() / "mcp_server_tools"))).resolve() / "mcp_backups").resolve()
+BACKUP_DIR = (BACKUPS_ROOT_DIR / "memory_backups").resolve()
 TOOL_LANGUAGE = os.environ.get("TOOL_LANGUAGE", "en").strip().lower()
 MCP_PORT = int(os.environ.get("MCP_PORT", "8003"))
 
@@ -453,6 +460,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Aktualizuje jeden rekord pamięci.\nMaksymalna długość podsumowania: 1000 znaków.\nMaksymalna długość treści: 100000 znaków.\nPoziom ważności: 1-10.",
         "memory_delete": "Trwale usuwa jeden rekord pamięci.",
         "memory_stats": "Zwraca statystyki pamięci i lokalne adresy MCP.",
+        "memory_backup": "Tworzy bezpieczny backup bazy SQLite pamięci. Backup zawsze trafia bezpośrednio do stałego katalogu ~/mcp_server_tools/mcp_backups/memory_backups/. Model nie może wybrać ścieżki, nazwy pliku ani utworzyć podkatalogu.",
         "server_info_memory": "Zwraca podstawowe informacje o serwerze pamięci i lokalne adresy MCP.",
     },
     "en": {
@@ -462,6 +470,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Update one memory record.\nSummary maximum length: 1000 characters.\nContent maximum length: 100000 characters.\nImportance range: 1-10.",
         "memory_delete": "Delete one memory record permanently.",
         "memory_stats": "Returns memory statistics and local MCP endpoints.",
+        "memory_backup": "Creates a safe SQLite backup of the memory database. The backup is always written directly to the fixed directory ~/mcp_server_tools/mcp_backups/memory_backups/. The model cannot choose the path, file name, or create a subdirectory.",
         "server_info_memory": "Returns basic memory server information and local MCP endpoints.",
     },
     "de": {
@@ -471,6 +480,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Aktualisiert einen Speichereintrag.\nMaximale Länge der Zusammenfassung: 1000 Zeichen.\nMaximale Inhaltslänge: 100000 Zeichen.\nWichtigkeitsstufe: 1-10.",
         "memory_delete": "Löscht einen Speichereintrag dauerhaft.",
         "memory_stats": "Gibt Speicherstatistiken und lokale MCP-Adressen zurück.",
+        "memory_backup": "Erstellt ein sicheres SQLite-Backup der Speicherdatenbank. Das Backup wird immer direkt im festen Verzeichnis ~/mcp_server_tools/mcp_backups/memory_backups/ gespeichert. Das Modell kann keinen Pfad, Dateinamen oder Unterordner wählen.",
         "server_info_memory": "Gibt grundlegende Informationen zum Speicherserver und lokale MCP-Adressen zurück.",
     },
     "fr": {
@@ -480,6 +490,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Met à jour un enregistrement de mémoire.\nLongueur maximale du résumé : 1000 caractères.\nLongueur maximale du contenu : 100000 caractères.\nNiveau d'importance : 1-10.",
         "memory_delete": "Supprime définitivement un enregistrement de mémoire.",
         "memory_stats": "Retourne les statistiques de mémoire et les adresses MCP locales.",
+        "memory_backup": "Crée une sauvegarde SQLite sûre de la base de mémoire. La sauvegarde est toujours écrite directement dans le dossier fixe ~/mcp_server_tools/mcp_backups/memory_backups/. Le modèle ne peut pas choisir le chemin, le nom du fichier ni créer de sous-dossier.",
         "server_info_memory": "Retourne les informations de base du serveur de mémoire et les adresses MCP locales.",
     },
     "it": {
@@ -489,6 +500,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Aggiorna un record di memoria.\nLunghezza massima del riepilogo: 1000 caratteri.\nLunghezza massima del contenuto: 100000 caratteri.\nLivello di importanza: 1-10.",
         "memory_delete": "Elimina definitivamente un record di memoria.",
         "memory_stats": "Restituisce statistiche della memoria e indirizzi MCP locali.",
+        "memory_backup": "Crea un backup SQLite sicuro del database della memoria. Il backup viene sempre scritto direttamente nella cartella fissa ~/mcp_server_tools/mcp_backups/memory_backups/. Il modello non può scegliere il percorso, il nome del file o creare una sottocartella.",
         "server_info_memory": "Restituisce le informazioni di base del server memoria e gli indirizzi MCP locali.",
     },
     "es": {
@@ -498,6 +510,7 @@ TOOL_DESCRIPTIONS = {
         "memory_update": "Actualiza un registro de memoria.\nLongitud máxima del resumen: 1000 caracteres.\nLongitud máxima del contenido: 100000 caracteres.\nNivel de importancia: 1-10.",
         "memory_delete": "Elimina permanentemente un registro de memoria.",
         "memory_stats": "Devuelve estadísticas de memoria y direcciones MCP locales.",
+        "memory_backup": "Crea una copia de seguridad SQLite segura de la base de memoria. La copia siempre se escribe directamente en el directorio fijo ~/mcp_server_tools/mcp_backups/memory_backups/. El modelo no puede elegir la ruta, el nombre del archivo ni crear un subdirectorio.",
         "server_info_memory": "Devuelve información básica del servidor de memoria y direcciones MCP locales.",
     },
 }
@@ -1293,6 +1306,40 @@ def memory_stats() -> dict[str, Any]:
     }
 
 
+def _memory_backup_target() -> Path:
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    backup_name = f"mcp_basic_memory_backup_{datetime.now(LOCAL_TIMEZONE).strftime('%d_%m_%Y_%H_%M_%S')}.sqlite3"
+    target = (BACKUP_DIR / backup_name).resolve()
+    fixed_backup_dir = BACKUP_DIR.resolve()
+    if target.parent != fixed_backup_dir:
+        raise RuntimeError("Backup file must be created directly inside the fixed memory backup directory.")
+    if target.exists():
+        raise FileExistsError("Backup file already exists. Run memory_backup again after one second.")
+    return target
+
+
+@mcp.tool(name="memory_backup", description=_tool_description("memory_backup"))
+def memory_backup() -> dict[str, Any]:
+    """Create a safe SQLite backup in the fixed backup directory."""
+    init_db()
+    target = _memory_backup_target()
+    with DB_LOCK:
+        source = _connect()
+        destination = sqlite3.connect(target)
+        try:
+            source.backup(destination)
+        finally:
+            destination.close()
+            source.close()
+    return {
+        "status": "created",
+        "backup_path": str(target),
+        "backup_dir": str(BACKUP_DIR),
+        "source_database": str(DB_PATH),
+        "size_bytes": target.stat().st_size,
+    }
+
+
 @mcp.tool(name="server_info_memory", description=_tool_description("server_info_memory"))
 def server_info_memory() -> dict[str, Any]:
     """Get server paths and endpoints."""
@@ -1302,6 +1349,7 @@ def server_info_memory() -> dict[str, Any]:
         "base_dir": str(BASE_DIR),
         "data_dir": str(DATA_DIR),
         "db_path": str(DB_PATH),
+        "backup_dir": str(BACKUP_DIR),
         "mcp_endpoint_local": f"http://127.0.0.1:{MCP_PORT}/mcp",
         "mcp_endpoint_lan": f"http://{local_ip}:{MCP_PORT}/mcp",
     }
@@ -1422,6 +1470,8 @@ print_summary() {
   printf '  %s\n' "${ROOT_DIR}"
   printf '  ├── mcp_database/\n'
   printf '  │   └── memory_database.sqlite3\n'
+  printf '  ├── mcp_backups/\n'
+  printf '  │   └── memory_backups/\n'
   printf '  └── %s/\n' "${PROJECT_DIR_NAME}"
   printf '      ├── %s\n' "${ENV_FILE##*/}"
   printf '      ├── .venv/\n'
@@ -1434,6 +1484,7 @@ print_summary() {
   printf '  %-*s %s\n' "${path_label_width}" 'application:' "${APP_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'database directory:' "${DATA_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'memory database:' "${DB_PATH}"
+  printf '  %-*s %s\n' "${path_label_width}" 'backups:' "${BACKUP_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'virtualenv:' "${VENV_DIR}"
 
   printf '\n'

@@ -19,6 +19,8 @@ APP_DIR="${BASE_DIR}/app"
 VENV_DIR="${BASE_DIR}/.venv"
 DATA_DIR="${ROOT_DIR}/mcp_database"
 CONTACTS_DB_PATH="${DATA_DIR}/contacts_database.sqlite3"
+BACKUPS_ROOT_DIR="${ROOT_DIR}/mcp_backups"
+BACKUP_DIR="${BACKUPS_ROOT_DIR}/contacts_backups"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}"
 ENV_FILE="${BASE_DIR}/${ENV_FILE_NAME}"
 
@@ -311,10 +313,11 @@ set_timezone_from_system() {
 }
 
 create_directories() {
-  log "Creating application and database directories"
+  log "Creating application, database, and backup directories"
   mkdir -p \
     "${APP_DIR}" \
-    "${DATA_DIR}"
+    "${DATA_DIR}" \
+    "${BACKUP_DIR}"
 }
 
 write_env_file() {
@@ -330,6 +333,8 @@ BASE_DIR=${BASE_DIR}
 APP_DIR=${APP_DIR}
 DATA_DIR=${DATA_DIR}
 CONTACTS_DB_PATH=${CONTACTS_DB_PATH}
+BACKUPS_ROOT_DIR=${BACKUPS_ROOT_DIR}
+BACKUP_DIR=${BACKUP_DIR}
 VENV_DIR=${VENV_DIR}
 MCP_PORT=${MCP_PORT}
 DEFAULT_TIMEZONE=${DEFAULT_TIMEZONE}
@@ -377,6 +382,8 @@ BASE_DIR = Path(
 ).resolve()
 DATA_DIR = Path(os.environ.get("DATA_DIR", str(Path.home() / "mcp_server_tools" / "mcp_database"))).resolve()
 CONTACTS_DB_PATH = Path(os.environ.get("CONTACTS_DB_PATH", str(DATA_DIR / "contacts_database.sqlite3"))).resolve()
+BACKUPS_ROOT_DIR = (Path(os.environ.get("ROOT_DIR", str(Path.home() / "mcp_server_tools"))).resolve() / "mcp_backups").resolve()
+BACKUP_DIR = (BACKUPS_ROOT_DIR / "contacts_backups").resolve()
 MCP_PORT = int(os.environ.get("MCP_PORT", "8004"))
 
 SUPPORTED_TOOL_LANGUAGES = {"pl", "en", "de", "fr", "it", "es"}
@@ -392,6 +399,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Aktualizuje istniejący kontakt według numerycznego ID kontaktu.",
         "contacts_delete": "Usuwa kontakt według numerycznego ID kontaktu.",
         "contacts_exists": "Sprawdza, czy kontakt istnieje lub czy zapytanie jednoznacznie wskazuje jeden kontakt.",
+        "contacts_backup": "Tworzy bezpieczny backup bazy SQLite kontaktów. Backup zawsze trafia bezpośrednio do stałego katalogu ~/mcp_server_tools/mcp_backups/contacts_backups/. Model nie może wybrać ścieżki, nazwy pliku ani utworzyć podkatalogu.",
         "server_info_contacts": "Zwraca podstawowe informacje o serwerze kontaktów, bazie danych i lokalnych adresach MCP.",
     },
     "en": {
@@ -404,6 +412,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Updates an existing contact by numeric contact ID.",
         "contacts_delete": "Deletes a contact by numeric contact ID.",
         "contacts_exists": "Checks whether a contact exists or whether the query resolves to one contact.",
+        "contacts_backup": "Creates a safe SQLite backup of the contacts database. The backup is always written directly to the fixed directory ~/mcp_server_tools/mcp_backups/contacts_backups/. The model cannot choose the path, file name, or create a subdirectory.",
         "server_info_contacts": "Returns basic contacts server information, database path, and local MCP endpoints.",
     },
     "de": {
@@ -416,6 +425,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Aktualisiert einen vorhandenen Kontakt anhand der numerischen Kontakt-ID.",
         "contacts_delete": "Löscht einen Kontakt anhand der numerischen Kontakt-ID.",
         "contacts_exists": "Prüft, ob ein Kontakt existiert oder ob die Anfrage eindeutig einen Kontakt ergibt.",
+        "contacts_backup": "Erstellt ein sicheres SQLite-Backup der Kontaktdatenbank. Das Backup wird immer direkt im festen Verzeichnis ~/mcp_server_tools/mcp_backups/contacts_backups/ gespeichert. Das Modell kann keinen Pfad, Dateinamen oder Unterordner wählen.",
         "server_info_contacts": "Gibt grundlegende Informationen zum Kontaktserver, zur Datenbank und zu lokalen MCP-Adressen zurück.",
     },
     "fr": {
@@ -428,6 +438,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Met à jour un contact existant à partir de son ID numérique.",
         "contacts_delete": "Supprime un contact à partir de son ID numérique.",
         "contacts_exists": "Vérifie si un contact existe ou si la requête correspond clairement à un contact.",
+        "contacts_backup": "Crée une sauvegarde SQLite sûre de la base de contacts. La sauvegarde est toujours écrite directement dans le dossier fixe ~/mcp_server_tools/mcp_backups/contacts_backups/. Le modèle ne peut pas choisir le chemin, le nom du fichier ni créer de sous-dossier.",
         "server_info_contacts": "Retourne les informations de base du serveur de contacts, de la base de données et les adresses MCP locales.",
     },
     "it": {
@@ -440,6 +451,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Aggiorna un contatto esistente tramite ID numerico.",
         "contacts_delete": "Elimina un contatto tramite ID numerico.",
         "contacts_exists": "Verifica se un contatto esiste o se la richiesta identifica chiaramente un contatto.",
+        "contacts_backup": "Crea un backup SQLite sicuro del database dei contatti. Il backup viene sempre scritto direttamente nella cartella fissa ~/mcp_server_tools/mcp_backups/contacts_backups/. Il modello non può scegliere il percorso, il nome del file o creare una sottocartella.",
         "server_info_contacts": "Restituisce le informazioni di base del server contatti, del database e gli indirizzi MCP locali.",
     },
     "es": {
@@ -452,6 +464,7 @@ TOOL_DESCRIPTIONS = {
         "contacts_update": "Actualiza un contacto existente por ID numérico.",
         "contacts_delete": "Elimina un contacto por ID numérico.",
         "contacts_exists": "Comprueba si un contacto existe o si la consulta identifica claramente un contacto.",
+        "contacts_backup": "Crea una copia de seguridad SQLite segura de la base de contactos. La copia siempre se escribe directamente en el directorio fijo ~/mcp_server_tools/mcp_backups/contacts_backups/. El modelo no puede elegir la ruta, el nombre del archivo ni crear un subdirectorio.",
         "server_info_contacts": "Devuelve información básica del servidor de contactos, la base de datos y direcciones MCP locales.",
     },
 }
@@ -1075,6 +1088,40 @@ def contacts_exists(input: ContactExistsInput) -> dict[str, Any]:
     return {"status": "ambiguous", "count": len(rows), "matches": rows}
 
 
+def _contacts_backup_target() -> Path:
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    backup_name = f"mcp_basic_contacts_backup_{datetime.now(LOCAL_TZ).strftime('%d_%m_%Y_%H_%M_%S')}.sqlite3"
+    target = (BACKUP_DIR / backup_name).resolve()
+    fixed_backup_dir = BACKUP_DIR.resolve()
+    if target.parent != fixed_backup_dir:
+        raise RuntimeError("Backup file must be created directly inside the fixed contacts backup directory.")
+    if target.exists():
+        raise FileExistsError("Backup file already exists. Run contacts_backup again after one second.")
+    return target
+
+
+@mcp.tool(name="contacts_backup", description=_tool_description("contacts_backup"))
+def contacts_backup() -> dict[str, Any]:
+    """Create a safe SQLite backup in the fixed backup directory."""
+    init_contacts_db()
+    target = _contacts_backup_target()
+    with CONTACTS_DB_LOCK:
+        source = _contact_db()
+        destination = sqlite3.connect(target)
+        try:
+            source.backup(destination)
+        finally:
+            destination.close()
+            source.close()
+    return {
+        "status": "created",
+        "backup_path": str(target),
+        "backup_dir": str(BACKUP_DIR),
+        "source_database": str(CONTACTS_DB_PATH),
+        "size_bytes": target.stat().st_size,
+    }
+
+
 @mcp.tool(description=_tool_description("server_info_contacts"))
 def server_info_contacts() -> dict[str, Any]:
     local_ip = _get_local_ip()
@@ -1088,6 +1135,7 @@ def server_info_contacts() -> dict[str, Any]:
         "project_name": PROJECT_NAME,
         "base_dir": str(BASE_DIR),
         "contacts_db_path": str(CONTACTS_DB_PATH),
+        "backup_dir": str(BACKUP_DIR),
         "mcp_endpoint_local": f"http://127.0.0.1:{MCP_PORT}/mcp",
         "mcp_endpoint_lan": f"http://{local_ip}:{MCP_PORT}/mcp",
         "timezone": DEFAULT_TIMEZONE,
@@ -1104,6 +1152,7 @@ def server_info_contacts() -> dict[str, Any]:
             "contacts_update",
             "contacts_delete",
             "contacts_exists",
+            "contacts_backup",
             "server_info_contacts",
         ],
     }
@@ -1223,6 +1272,8 @@ print_summary() {
   printf '  %s\n' "${ROOT_DIR}"
   printf '  ├── mcp_database/\n'
   printf '  │   └── contacts_database.sqlite3\n'
+  printf '  ├── mcp_backups/\n'
+  printf '  │   └── contacts_backups/\n'
   printf '  └── %s/\n' "${PROJECT_DIR_NAME}"
   printf '      ├── %s\n' "${ENV_FILE##*/}"
   printf '      ├── .venv/\n'
@@ -1235,6 +1286,7 @@ print_summary() {
   printf '  %-*s %s\n' "${path_label_width}" 'application:' "${APP_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'database directory:' "${DATA_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'contacts database:' "${CONTACTS_DB_PATH}"
+  printf '  %-*s %s\n' "${path_label_width}" 'backups:' "${BACKUP_DIR}"
   printf '  %-*s %s\n' "${path_label_width}" 'virtualenv:' "${VENV_DIR}"
 
   printf '\n'

@@ -98,6 +98,17 @@ Then test again with:
 Please check today's national and international news.
 ```
 
+## Where are memory and contacts backups?
+
+The `memory_backup` and `contacts_backup` tools write SQLite backups only to fixed directories:
+
+```text
+~/mcp_server_tools/mcp_backups/memory_backups/
+~/mcp_server_tools/mcp_backups/contacts_backups/
+```
+
+The model cannot choose another path, file name, or subdirectory.
+
 ## Generated files are in the wrong language
 
 The installer language is always English. The language choice affects only MCP tool descriptions.

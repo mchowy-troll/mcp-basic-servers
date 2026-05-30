@@ -17,8 +17,8 @@ The scripts are designed for moderately technical Linux users who want practical
 |---|---:|---|---|
 | `mcp_basic_web.sh` | `8001` | Provides live web access for LLM clients through a local SearXNG instance. It can search for current news, recent events, prices, exchange rates, software updates, and other time-sensitive information, then fetch and extract readable text from specific webpages when deeper source context is needed. | Docker/SearXNG directory inside the project |
 | `mcp_basic_files.sh` | `8002` | Gives the model a safe local workspace for practical file tasks: reading and writing text files, working with CSV data, saving Markdown notes, and generating PDFs from Markdown without exposing arbitrary filesystem paths. | `~/mcp_server_tools/mcp_workspace/` |
-| `mcp_basic_memory.sh` | `8003` | Provides a local long-term memory store backed by SQLite. It lets the model write structured memory records, search them by title/content/tags, retrieve relevant context, update records, delete records, and inspect memory statistics. | `~/mcp_server_tools/mcp_database/` |
-| `mcp_basic_contacts.sh` | `8004` | Provides a local contacts database for people, companies, email addresses, phone numbers, addresses, notes, and tags. It helps the model search contacts, resolve recipients, check whether a contact exists, and manage contact records locally. | `~/mcp_server_tools/mcp_database/` |
+| `mcp_basic_memory.sh` | `8003` | Provides a local long-term memory store backed by SQLite. It lets the model write structured memory records, search them by title/content/tags, retrieve relevant context, update records, delete records, inspect memory statistics, and create fixed-location SQLite backups. | `~/mcp_server_tools/mcp_database/`, `~/mcp_server_tools/mcp_backups/memory_backups/` |
+| `mcp_basic_contacts.sh` | `8004` | Provides a local contacts database for people, companies, email addresses, phone numbers, addresses, notes, and tags. It helps the model search contacts, resolve recipients, check whether a contact exists, manage contact records locally, and create fixed-location SQLite backups. | `~/mcp_server_tools/mcp_database/`, `~/mcp_server_tools/mcp_backups/contacts_backups/` |
 | `mcp_basic_wiki_verifier.sh` | `8005` | Helps verify factual background about entities using Wikidata and English Wikipedia. It can resolve names to candidate entities, fetch structured Wikidata facts, retrieve article context, and build a source-backed context bundle for fact-checking or disambiguation. | none |
 | `mcp_basic_weather.sh` | `8006` | Provides weather tools based on Open-Meteo: geocoding cities, checking current weather by coordinates or city, and retrieving hourly or daily forecasts with practical limits for home/local assistant use. | none |
 
@@ -86,6 +86,7 @@ Shared directories are created only when needed:
 ```text
 ~/mcp_server_tools/mcp_workspace/   # only for files
 ~/mcp_server_tools/mcp_database/    # only for memory and contacts
+~/mcp_server_tools/mcp_backups/     # only for memory and contacts SQLite backups
 ```
 
 `mcp_basic_web.sh` additionally creates:

@@ -70,8 +70,8 @@ uvicorn server:app --host 0.0.0.0 --port ${MCP_PORT}
 |---|---:|---:|---|
 | web | no | no | creates `searxng/` inside project |
 | files | yes | no | uses `mcp_workspace` |
-| memory | no | yes | uses SQLite in `mcp_database` |
-| contacts | no | yes | uses SQLite in `mcp_database` |
+| memory | no | yes | uses SQLite in `mcp_database` and backups in `mcp_backups/memory_backups` |
+| contacts | no | yes | uses SQLite in `mcp_database` and backups in `mcp_backups/contacts_backups` |
 | wiki_verifier | no | no | external APIs only |
 | weather | no | no | external APIs only |
 
@@ -92,7 +92,7 @@ Recommended LLM-side tool tests:
 
 - web: `datetime_get`, `web_search`, `webpage_fetch`, `server_info_web`
 - files: text read/write, CSV read/write, Markdown save, PDF save
-- memory: write, search by exact title, get context, update, stats, delete
-- contacts: create, search, get, update, resolve recipient, delete
+- memory: write, search by exact title, get context, update, stats, backup, delete
+- contacts: create, search, get, update, resolve recipient, backup, delete
 - wiki verifier: resolve entity, get Wikidata facts, get Wikipedia article, answer context
 - weather: geocode city, current weather, hourly forecast, daily forecast
